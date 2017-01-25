@@ -9,82 +9,126 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 public class NetworkManager
 {
+    private static final int CURRENT_PLAYER = 0, ENEMY = 1;
+    private HorseGame horseGame;
     private Socket socket;
     private BufferedWriter writer;
     private BufferedReader reader;
-    private Map<String, String> games;
-    private Thread finder;
     private Thread remotePlayer;
     private int PORT_NUMBER = 12014;
+    private List<Integer> coords;
+    private boolean isHost;
+    private OnConnectedListener onConnectedListener;
+    private HorseGame.OnGameOverListener onGameOverListener;
+    private HorseGame.OnStateChangeListener onStateChangeListener;
 
-    public void createGame(String gameName)
+    public void createGame()
     {
-        try
-        {
-            socket = new ServerSocket(PORT_NUMBER).accept();
-            initStreams();
-            sendMessage(gameName);
-            if (!reader.readLine().equals("skip"))
-                runInteraction();
-        } catch (IOException e)
-        {
-            Log.e("createGame", e.toString());
-        }
+        if (remotePlayer != null && remotePlayer.isAlive())
+            remotePlayer.interrupt();
+        (remotePlayer = new Thread(new Runnable() //Ваня, в твоем случае
+        {                                         //просто
+            @Override                             //вместо new Runnable...
+            public void run()                     //()=>{...}
+            {                                     //<
+                try
+                {
+                    socket = new ServerSocket(PORT_NUMBER).accept();
+                    initStreams();
+                    isHost = true;
+                    runInteraction();
+                } catch (IOException e)
+                {
+                    Log.e("createGame", e.toString());
+                }
+            }
+        })).start();
+
     }
 
-    public String connectGame(String host, boolean skip)
+    public void connectGame(String host)
     {
         try
         {
             socket = new Socket(host, PORT_NUMBER);
             initStreams();
-            String message = reader.readLine().replace("\\n", "\n");
-            sendMessage(skip ? "skip" : "ok");
-            return message;
+            runInteraction();
         } catch (IOException e)
         {
-            Log.e("createGame", e.toString());
-            return null;
+            Log.e("connectGame", e.toString());
         }
     }
 
-    public void findGames()
-    {
-        games = new HashMap<>();
-        if (finder != null && finder.isAlive())
-            finder.interrupt();
-        (finder = new Thread(new Runnable() //В твоем случае
-        {                                   //просто
-            @Override                       //вместо new Runnable...
-            public void run()               //()=>{...}
-            {                               //<
-
-            }
-        })).start();
-    }
 
     public void runInteraction()
     {
-        if (remotePlayer != null && remotePlayer.isAlive())
-            remotePlayer.interrupt();
-        (remotePlayer = new Thread(new Runnable()
+        //...client connected...
+        //server: Vasya's game
+        //client: ok
+        //...
+        try
         {
-            @Override
-            public void run()
+            if (onConnectedListener != null)
+                onConnectedListener.onConnected();
+
+            horseGame = HorseGame.getInstance(true);
+            horseGame.setOnStateChange(new HorseGame.OnStateChangeListener()
+            {   //Ваня, в твоем случае... Глянь в createGame.
+                @Override
+                public void onStateChange(Horse horse)
+                {
+                    coords = new ArrayList<>();
+                    coords.add(horse.getX());
+                    coords.add(horse.getY());
+                    if (onStateChangeListener != null)
+                        onStateChangeListener.onStateChange(horse);
+                }
+            });
+
+            Horse currentPlayer = horseGame.getHorse(CURRENT_PLAYER);
+            Horse enemyPlayer = horseGame.getHorse(ENEMY);
+            if (!isHost)
             {
+                sendMessage("15_0");
+                currentPlayer.setX(0);
+                currentPlayer.setY(15);
+            }
+            while (!Thread.interrupted())
+            {
+                List<Integer> enemyCoords = Utils.parseCoordinates(receiveMessage());
+                if (enemyCoords != null)
+                {
+                    enemyPlayer.setX(enemyCoords.get(0));
+                    enemyPlayer.setY(enemyCoords.get(1));
+                }
+
+                if (coords != null)
+                {
+                    sendMessage(Utils.packCoordinates(coords));
+                    coords = null;
+                }
 
             }
-        })).start();
+
+        } catch (IOException e)
+        {
+            Log.e("runInteraction", e.toString());
+        }
+    }
+
+    public String receiveMessage() throws IOException
+    {
+        return reader.readLine().replace("\\n", "\n");
     }
 
     public void sendMessage(String message) throws IOException
     {
-        writer.write(message + "\n");
+        writer.write(message.replace("\n", "\\n") + "\n");
         writer.flush();
     }
 
@@ -94,9 +138,19 @@ public class NetworkManager
         reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
     }
 
-    interface OnMessageAcceptedListener
+    public void setOnConnectedListener(OnConnectedListener onConnectedListener)
     {
-        void onMessageAccepted();
+        this.onConnectedListener = onConnectedListener;
+    }
+
+    public void setOnGameOverListener(HorseGame.OnGameOverListener onGameOverListener)
+    {
+        this.onGameOverListener = onGameOverListener;
+    }
+
+    public void setOnStateChange(HorseGame.OnStateChangeListener onStateChange)
+    {
+        this.onStateChangeListener = onStateChange;
     }
 
     interface OnConnectedListener
