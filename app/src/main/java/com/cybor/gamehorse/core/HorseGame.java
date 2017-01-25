@@ -23,6 +23,19 @@ public class HorseGame
 
     private HorseGame(boolean multiplayer)
     {
+        init(multiplayer);
+    }
+
+    public static HorseGame getInstance(boolean multiplayer)
+    {
+        if (instance == null)
+            instance = new HorseGame(multiplayer);
+        return instance;
+    }
+
+    private void init(boolean multiplayer)
+    {
+        firstMove = true;
         map = new GameMap(10, 10);
         history = new ArrayList<>();
         this.multiplayer = multiplayer;
@@ -32,6 +45,7 @@ public class HorseGame
             List<Horse> playerHistory = new ArrayList<>();
             final Horse horse = new Horse();
             playerHistory.add(horse);
+
             horse.setOnPositionChangeListener(new Horse.OnPositionChangeListener()
             {
                 //Глянь в NetworkManager. Там подобная конструкция.
@@ -49,13 +63,6 @@ public class HorseGame
             history.add(playerHistory);
         }
 
-    }
-
-    public static HorseGame getInstance(boolean multiplayer)
-    {
-        if (instance == null)
-            instance = new HorseGame(multiplayer);
-        return instance;
     }
 
     public void setOnStateChange(OnStateChangeListener onStateChange)
@@ -76,15 +83,20 @@ public class HorseGame
     public boolean rollBack(int player)
     {
         List<Horse> playerHistory = history.get(player);
-        if (!playerHistory.isEmpty())
+        if (playerHistory.size() > 1)
         {
             Horse horse = getHorse(player);
             map.setCell(horse.getX(), horse.getY(), EMPTY);
             playerHistory.remove(playerHistory.size() - 1);
+
+            Horse lastStep = playerHistory.get(playerHistory.size() - 1);
+            map.setCell(lastStep.getX(), lastStep.getY(), HORSE);
+            if (onStateChangeListener != null)
+                onStateChangeListener.onStateChange(lastStep);
             return true;
         } else
         {
-            firstMove = true;
+            reset();
             return false;
         }
     }
@@ -153,6 +165,13 @@ public class HorseGame
     {
         List<Horse> playerHistory = history.get(playerId);
         return playerHistory.get(playerHistory.size() - 1);
+    }
+
+    public void reset()
+    {
+        init(multiplayer);
+        if (onStateChangeListener != null)
+            onStateChangeListener.onStateChange(null);
     }
 
     public void setOnGameOverListener(OnGameOverListener onGameOverListener)

@@ -56,8 +56,9 @@ public class Horse
 
         //Можно через Cloneable, но не нужно, т.к. нужна ссылка на коллбэк
         //Да и старую надо снести, чтобы не засорять стек
+        //...сказал он и осознал всю глупость данного утверждения
         horse.setOnPositionChangeListener(onPositionChangeListener);
-        setOnPositionChangeListener(null);
+        setOnPositionChangeListener(onPositionChangeListener);
 
         return horse;
     }
