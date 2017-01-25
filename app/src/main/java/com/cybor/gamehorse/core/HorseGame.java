@@ -58,7 +58,7 @@ public class HorseGame implements Horse.OnPositionChangeListener
 
     public boolean rollBack(int player)
     {
-        List<Horse> playerHistory = new ArrayList<>();
+        List<Horse> playerHistory = history.get(player);
         if (!playerHistory.isEmpty())
         {
             Horse horse = getHorse(player);
