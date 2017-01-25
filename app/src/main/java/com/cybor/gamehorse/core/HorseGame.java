@@ -5,6 +5,7 @@ import java.util.List;
 
 import static com.cybor.gamehorse.core.Horse.LOOSE;
 import static com.cybor.gamehorse.core.Horse.PLAYING;
+import static com.cybor.gamehorse.core.Horse.WIN;
 import static java.lang.Math.abs;
 
 public class HorseGame implements Horse.OnPositionChangeListener
@@ -59,13 +60,16 @@ public class HorseGame implements Horse.OnPositionChangeListener
         {
             horse.setX(x);
             horse.setY(y);
+            history.get(player).add(horse.copy());
             return true;
         } else
         {
-            if (multiplayer)
-            {
-
-            } else horse.setState(LOOSE);
+            if (!stepsAvailable(horse))
+                if (multiplayer)
+                {
+                    horse.setState(WIN);
+                    getHorse(player == 0 ? 1 : 0).setState(LOOSE);
+                } else horse.setState(LOOSE);
             return false;
         }
     }

@@ -47,6 +47,21 @@ public class Horse
             onPositionChangeListener.onPositionChange(this);
     }
 
+    public Horse copy()
+    {
+        Horse horse = new Horse();
+        horse.setX(x);
+        horse.setY(y);
+        horse.setState(state);
+
+        //Можно через Cloneable, но не нужно, т.к. нужна ссылка на коллбэк
+        //Да и старую надо снести, чтобы не засорять стек
+        horse.setOnPositionChangeListener(onPositionChangeListener);
+        setOnPositionChangeListener(null);
+
+        return horse;
+    }
+
     interface OnPositionChangeListener
     {
         void onPositionChange(Horse sender);
