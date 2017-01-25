@@ -15,6 +15,7 @@ import java.util.List;
 public class NetworkManager
 {
     private static final int CURRENT_PLAYER = 0, ENEMY = 1;
+    private static NetworkManager instance;
     private HorseGame horseGame;
     private Socket socket;
     private BufferedWriter writer;
@@ -26,14 +27,13 @@ public class NetworkManager
     private OnConnectedListener onConnectedListener;
     private HorseGame.OnGameOverListener onGameOverListener;
     private HorseGame.OnStateChangeListener onStateChangeListener;
-    private NetworkManager instance;
 
     private NetworkManager()
     {
 
     }
 
-    public NetworkManager getInstance()
+    public static NetworkManager getInstance()
     {
         if (instance == null)
             instance = new NetworkManager();
