@@ -166,7 +166,7 @@ public class NetworkManager
         this.onStateChangeListener = onStateChange;
     }
 
-    interface OnConnectedListener
+    public interface OnConnectedListener
     {
         void onConnected();
     }

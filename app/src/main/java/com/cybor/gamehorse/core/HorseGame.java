@@ -19,17 +19,17 @@ public class HorseGame
     private boolean multiplayer;
     private OnStateChangeListener onStateChangeListener;
     private OnGameOverListener onGameOverListener;
+    private boolean firstMove = true;
 
     private HorseGame(boolean multiplayer)
     {
-        map = new GameMap(15, 15);
+        map = new GameMap(10, 10);
         history = new ArrayList<>();
         this.multiplayer = multiplayer;
 
         for (int i = 0; i < (multiplayer ? 2 : 1); i++)
         {
             List<Horse> playerHistory = new ArrayList<>();
-            //Ваня, забей на final. Это для джавы, гарантия, что-то вроде константы.
             final Horse horse = new Horse();
             playerHistory.add(horse);
             horse.setOnPositionChangeListener(new Horse.OnPositionChangeListener()
@@ -82,37 +82,44 @@ public class HorseGame
             map.setCell(horse.getX(), horse.getY(), EMPTY);
             playerHistory.remove(playerHistory.size() - 1);
             return true;
+        } else
+        {
+            firstMove = true;
+            return false;
         }
-        return false;
     }
 
     public boolean tryStep(int player, int x, int y)
     {
         Horse horse = getHorse(player);
-        if (horse.getState() == PLAYING && stepAvailable(horse, x, y))
+        if (horse.getState() == PLAYING && (stepAvailable(horse, x, y) || firstMove))
         {
-            horse.setX(x);
-            horse.setY(y);
 
             List<Horse> playerHistory = history.get(player);
-            if (!playerHistory.isEmpty())
+            if (!playerHistory.isEmpty() && !firstMove)
             {
                 Horse step = playerHistory.get(playerHistory.size() - 1);
                 map.setCell(step.getX(), step.getY(), STEP);
             }
 
             map.setCell(x, y, HORSE);
+            horse.setX(x);
+            horse.setY(y);
             playerHistory.add(horse.copy());
+
+            firstMove = false;
             return true;
         } else
         {
             if (!stepsAvailable(horse))
+            {
                 if (multiplayer)
                 {
                     Horse enemy = getHorse(player == 0 ? 1 : 0);
                     enemy.setState(stepsAvailable(enemy) ? WIN : LOOSE);
                 }
-            horse.setState(LOOSE);
+                horse.setState(LOOSE);
+            }
             return false;
         }
     }
@@ -145,7 +152,7 @@ public class HorseGame
     public Horse getHorse(int playerId)
     {
         List<Horse> playerHistory = history.get(playerId);
-        return playerHistory.get(playerHistory.size());
+        return playerHistory.get(playerHistory.size() - 1);
     }
 
     public void setOnGameOverListener(OnGameOverListener onGameOverListener)
@@ -153,12 +160,12 @@ public class HorseGame
         this.onGameOverListener = onGameOverListener;
     }
 
-    interface OnStateChangeListener
+    public interface OnStateChangeListener
     {
         void onStateChange(Horse horse);
     }
 
-    interface OnGameOverListener
+    public interface OnGameOverListener
     {
         void onGameOver(Horse looser);
     }
