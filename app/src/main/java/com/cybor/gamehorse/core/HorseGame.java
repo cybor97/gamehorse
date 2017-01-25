@@ -92,9 +92,10 @@ public class HorseGame implements Horse.OnPositionChangeListener
             if (!stepsAvailable(horse))
                 if (multiplayer)
                 {
-                    horse.setState(WIN);
-                    getHorse(player == 0 ? 1 : 0).setState(LOOSE);
-                } else horse.setState(LOOSE);
+                    Horse enemy = getHorse(player == 0 ? 1 : 0);
+                    enemy.setState(stepsAvailable(enemy) ? WIN : LOOSE);
+                }
+            horse.setState(LOOSE);
             return false;
         }
     }
