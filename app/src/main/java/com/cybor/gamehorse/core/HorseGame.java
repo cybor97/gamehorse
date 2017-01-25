@@ -40,9 +40,9 @@ public class HorseGame
                 public void onPositionChange(Horse sender)
                 {
                     if (onStateChangeListener != null)
-                        onStateChangeListener.onStateChange(horse);
-                    if (!stepsAvailable(horse) && onGameOverListener != null)
-                        onGameOverListener.onGameOver(horse);
+                        onStateChangeListener.onStateChange(sender);
+                    if (!stepsAvailable(sender) && onGameOverListener != null)
+                        onGameOverListener.onGameOver(sender);
                 }
             });
 
