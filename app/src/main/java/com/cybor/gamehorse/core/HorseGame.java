@@ -11,13 +11,14 @@ import static com.cybor.gamehorse.core.Horse.PLAYING;
 import static com.cybor.gamehorse.core.Horse.WIN;
 import static java.lang.Math.abs;
 
-public class HorseGame implements Horse.OnPositionChangeListener
+public class HorseGame
 {
     private static HorseGame instance;
     private GameMap map;
     private List<List<Horse>> history;
     private boolean multiplayer;
     private OnStateChangeListener onStateChangeListener;
+    private OnGameOverListener onGameOverListener;
 
     private HorseGame(boolean multiplayer)
     {
@@ -28,7 +29,23 @@ public class HorseGame implements Horse.OnPositionChangeListener
         for (int i = 0; i < (multiplayer ? 2 : 1); i++)
         {
             List<Horse> playerHistory = new ArrayList<>();
-            playerHistory.add(new Horse());
+            //Ваня, забей на final. Это для джавы, гарантия, что-то вроде константы.
+            final Horse horse = new Horse();
+            playerHistory.add(horse);
+            horse.setOnPositionChangeListener(new Horse.OnPositionChangeListener()
+            {
+                //Глянь в NetworkManager. Там подобная конструкция.
+                //Только (sender)=>{...
+                @Override
+                public void onPositionChange(Horse sender)
+                {
+                    if (onStateChangeListener != null)
+                        onStateChangeListener.onStateChange(horse);
+                    if (!stepsAvailable(horse) && onGameOverListener != null)
+                        onGameOverListener.onGameOver(horse);
+                }
+            });
+
             history.add(playerHistory);
         }
 
@@ -125,21 +142,24 @@ public class HorseGame implements Horse.OnPositionChangeListener
                 map.getCell(x, y) == EMPTY;
     }
 
-    @Override
-    public void onPositionChange(Horse horse)
-    {
-        if (onStateChangeListener != null)
-            onStateChangeListener.onStateChange(horse);
-    }
-
     public Horse getHorse(int playerId)
     {
         List<Horse> playerHistory = history.get(playerId);
         return playerHistory.get(playerHistory.size());
     }
 
+    public void setOnGameOverListener(OnGameOverListener onGameOverListener)
+    {
+        this.onGameOverListener = onGameOverListener;
+    }
+
     interface OnStateChangeListener
     {
         void onStateChange(Horse horse);
+    }
+
+    interface OnGameOverListener
+    {
+        void onGameOver(Horse looser);
     }
 }
