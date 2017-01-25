@@ -26,6 +26,19 @@ public class NetworkManager
     private OnConnectedListener onConnectedListener;
     private HorseGame.OnGameOverListener onGameOverListener;
     private HorseGame.OnStateChangeListener onStateChangeListener;
+    private NetworkManager instance;
+
+    private NetworkManager()
+    {
+
+    }
+
+    public NetworkManager getInstance()
+    {
+        if (instance == null)
+            instance = new NetworkManager();
+        return instance;
+    }
 
     public void createGame()
     {
