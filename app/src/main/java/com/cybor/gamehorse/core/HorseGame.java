@@ -3,6 +3,9 @@ package com.cybor.gamehorse.core;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.cybor.gamehorse.core.GameMap.EMPTY;
+import static com.cybor.gamehorse.core.GameMap.HORSE;
+import static com.cybor.gamehorse.core.GameMap.STEP;
 import static com.cybor.gamehorse.core.Horse.LOOSE;
 import static com.cybor.gamehorse.core.Horse.PLAYING;
 import static com.cybor.gamehorse.core.Horse.WIN;
@@ -53,6 +56,19 @@ public class HorseGame implements Horse.OnPositionChangeListener
         return map;
     }
 
+    public boolean rollBack(int player)
+    {
+        List<Horse> playerHistory = new ArrayList<>();
+        if (!playerHistory.isEmpty())
+        {
+            Horse horse = getHorse(player);
+            map.setCell(horse.getX(), horse.getY(), EMPTY);
+            playerHistory.remove(playerHistory.size() - 1);
+            return true;
+        }
+        return false;
+    }
+
     public boolean tryStep(int player, int x, int y)
     {
         Horse horse = getHorse(player);
@@ -60,7 +76,16 @@ public class HorseGame implements Horse.OnPositionChangeListener
         {
             horse.setX(x);
             horse.setY(y);
-            history.get(player).add(horse.copy());
+
+            List<Horse> playerHistory = history.get(player);
+            if (!playerHistory.isEmpty())
+            {
+                Horse step = playerHistory.get(playerHistory.size() - 1);
+                map.setCell(step.getX(), step.getY(), STEP);
+            }
+
+            map.setCell(x, y, HORSE);
+            playerHistory.add(horse.copy());
             return true;
         } else
         {
@@ -96,7 +121,7 @@ public class HorseGame implements Horse.OnPositionChangeListener
         return (abs(horse.getX() - x) == 2 && abs(horse.getY() - y) == 1 ||
                 abs(horse.getX() - x) == 1 && abs(horse.getY() - y) == 2) &&
                 x < map.getWidth() && y < map.getHeight() &&
-                map.getCell(x, y) == GameMap.EMPTY;
+                map.getCell(x, y) == EMPTY;
     }
 
     @Override

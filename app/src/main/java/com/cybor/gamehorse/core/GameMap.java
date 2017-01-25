@@ -26,6 +26,11 @@ public class GameMap
         return getWidth() > x && getHeight() > y ? map.get(x).get(y) : INVALID;
     }
 
+    public void setCell(int x, int y, int value)
+    {
+        map.get(x).set(y, value);
+    }
+
     public int getWidth()
     {
         return map.size();
