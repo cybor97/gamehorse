@@ -4,6 +4,7 @@ public class Horse
 {
     public static final int PLAYING = 0, WIN = 1, LOOSE = 2;
     private int x, y, state = PLAYING;
+    private int score;
     private OnPositionChangeListener onPositionChangeListener;
 
     public void setOnPositionChangeListener(OnPositionChangeListener onPositionChange)
@@ -19,8 +20,7 @@ public class Horse
     public void setX(int x)
     {
         this.x = x;
-        if (onPositionChangeListener != null)
-            onPositionChangeListener.onPositionChange(this);
+        invokeOnPositionChangeListener();
     }
 
     public int getY()
@@ -31,8 +31,7 @@ public class Horse
     public void setY(int y)
     {
         this.y = y;
-        if (onPositionChangeListener != null)
-            onPositionChangeListener.onPositionChange(this);
+        invokeOnPositionChangeListener();
     }
 
     public int getState()
@@ -43,8 +42,18 @@ public class Horse
     public void setState(int state)
     {
         this.state = state;
-        if (onPositionChangeListener != null)
-            onPositionChangeListener.onPositionChange(this);
+        invokeOnPositionChangeListener();
+    }
+
+    public int getScore()
+    {
+        return score;
+    }
+
+    public void setScore(int score)
+    {
+        this.score = score;
+        invokeOnPositionChangeListener();
     }
 
     public Horse copy()
@@ -53,14 +62,18 @@ public class Horse
         horse.setX(x);
         horse.setY(y);
         horse.setState(state);
+        horse.setScore(score);
 
-        //Можно через Cloneable, но не нужно, т.к. нужна ссылка на коллбэк
-        //Да и старую надо снести, чтобы не засорять стек
-        //...сказал он и осознал всю глупость данного утверждения
         horse.setOnPositionChangeListener(onPositionChangeListener);
         setOnPositionChangeListener(onPositionChangeListener);
 
         return horse;
+    }
+
+    private void invokeOnPositionChangeListener()
+    {
+        if (onPositionChangeListener != null)
+            onPositionChangeListener.onPositionChange(this);
     }
 
     interface OnPositionChangeListener

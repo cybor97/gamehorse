@@ -91,6 +91,7 @@ public class HorseGame
 
             Horse lastStep = playerHistory.get(playerHistory.size() - 1);
             map.setCell(lastStep.getX(), lastStep.getY(), HORSE);
+            horse.setScore(horse.getScore() - 1);
             if (onStateChangeListener != null)
                 onStateChangeListener.onStateChange(lastStep);
             return true;
@@ -117,6 +118,7 @@ public class HorseGame
             map.setCell(x, y, HORSE);
             horse.setX(x);
             horse.setY(y);
+            horse.setScore(horse.getScore() + 1);
             playerHistory.add(horse.copy());
 
             firstMove = false;
