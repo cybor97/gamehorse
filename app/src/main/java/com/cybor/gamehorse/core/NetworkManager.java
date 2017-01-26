@@ -80,10 +80,6 @@ public class NetworkManager
 
     public void runInteraction()
     {
-        //...client connected...
-        //server: Vasya's game
-        //client: ok
-        //...
         try
         {
             if (onConnectedListener != null)
