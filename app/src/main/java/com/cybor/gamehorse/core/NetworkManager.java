@@ -44,11 +44,11 @@ public class NetworkManager
     {
         if (remotePlayer != null && remotePlayer.isAlive())
             remotePlayer.interrupt();
-        (remotePlayer = new Thread(new Runnable() //Ваня, в твоем случае
-        {                                         //просто
-            @Override                             //вместо new Runnable...
-            public void run()                     //()=>{...}
-            {                                     //<
+        (remotePlayer = new Thread(new Runnable()
+        {
+            @Override
+            public void run()
+            {
                 try
                 {
                     socket = new ServerSocket(PORT_NUMBER).accept();
@@ -64,17 +64,26 @@ public class NetworkManager
 
     }
 
-    public void connectGame(String host)
+    public void connectGame(final String host)
     {
-        try
+        if (remotePlayer != null && remotePlayer.isAlive())
+            remotePlayer.interrupt();
+        (remotePlayer = new Thread(new Runnable()
         {
-            socket = new Socket(host, PORT_NUMBER);
-            initStreams();
-            runInteraction();
-        } catch (IOException e)
-        {
-            Log.e("connectGame", e.toString());
-        }
+            @Override
+            public void run()
+            {
+                try
+                {
+                    socket = new Socket(host, PORT_NUMBER);
+                    initStreams();
+                    runInteraction();
+                } catch (IOException e)
+                {
+                    Log.e("createGame", e.toString());
+                }
+            }
+        })).start();
     }
 
 
