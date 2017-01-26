@@ -14,6 +14,7 @@ import com.cybor.gamehorse.R;
 import com.cybor.gamehorse.core.GameMap;
 import com.cybor.gamehorse.core.Horse;
 import com.cybor.gamehorse.core.HorseGame;
+import com.cybor.gamehorse.core.NetworkManager;
 import com.cybor.gamehorse.core.Utils;
 
 import java.util.ArrayList;
@@ -34,11 +35,13 @@ import static com.cybor.gamehorse.core.GameMap.STEP;
 public class MainActivity extends AppCompatActivity implements
         View.OnClickListener,
         HorseGame.OnStateChangeListener,
-        HorseGame.OnGameOverListener
+        HorseGame.OnGameOverListener,
+        NetworkManager.OnConnectedListener
 {
     private static final int NONE = 0;
     private static final int LOCAL_MODE = 1, NETWORK_MODE = 2;
     private static final int HOST = 1, CLIENT = 2;
+    NetworkManager networkManager;
     private int networkMode = NONE;
     private int gameMode = NONE;
     private View menuContainer;
@@ -78,7 +81,7 @@ public class MainActivity extends AppCompatActivity implements
         switch (v.getId())
         {
             case R.id.local_mode_button:
-                if (networkMode != NONE)
+                if (networkMode == (CLIENT | HOST))
                 {
                     networkMode = HOST;
                     hostET.setVisibility(VISIBLE);
@@ -95,7 +98,9 @@ public class MainActivity extends AppCompatActivity implements
                             (ipAddress >> 8 & 0xff),
                             (ipAddress >> 16 & 0xff),
                             (ipAddress >> 24 & 0xff)));
-                } else
+                } else if (networkMode == HOST)
+                    startGameNetwork(null);
+                else
                 {
                     networkMode = NONE;
                     menuContainer.animate().alpha(0).withEndAction(new Runnable()
@@ -111,12 +116,14 @@ public class MainActivity extends AppCompatActivity implements
                 }
                 break;
             case R.id.network_mode_button:
-                if (networkMode != NONE)
+                if (networkMode == (CLIENT | HOST))
                 {
                     hostET.setVisibility(VISIBLE);
                     localModeButton.setVisibility(GONE);
                     networkMode = CLIENT;
-                } else
+                } else if (networkMode == CLIENT)
+                    startGameNetwork(hostET.getText().toString());
+                else
                 {
                     localModeButton.setText(R.string.create_game);
                     networkModeButton.setText(R.string.connect_game);
@@ -135,15 +142,15 @@ public class MainActivity extends AppCompatActivity implements
 
             default:
                 for (int i = 0; i < viewMap.values().size(); i++)
-                {
                     if (new ArrayList<>(viewMap.values()).get(i) == v)
                     {
-                        List<Integer> coords = Utils.parseCoordinates(new ArrayList<>(viewMap.keySet()).get(i));
+                        List<Integer> coords = Utils
+                                .parseCoordinates(new ArrayList<>(viewMap.keySet())
+                                        .get(i));
                         if (coords != null)
                             game.tryStep(0, coords.get(0), coords.get(1));
                         break;
                     }
-                }
                 break;
         }
     }
@@ -151,12 +158,31 @@ public class MainActivity extends AppCompatActivity implements
 
     private void startGameLocal()
     {
-        findViewById(R.id.game_container).setVisibility(VISIBLE);
+        generateField();
 
+        game = HorseGame.getInstance(false);
+        game.setOnStateChange(this);
+        game.setOnGameOverListener(this);
+    }
+
+    private void startGameNetwork(String host)
+    {
+        networkManager = NetworkManager.getInstance();
+        if (host != null)
+            networkManager.createGame();
+        else
+            networkManager.connectGame(host);
+        networkManager.setOnStateChange(this);
+        networkManager.setOnConnectedListener(this);
+        networkManager.setOnGameOverListener(this);
+    }
+
+    private void generateField()
+    {
         viewMap = new HashMap<>();
+        findViewById(R.id.game_container).setVisibility(VISIBLE);
         int cellWidth = gameContainer.getMeasuredWidth() / 10;
         int cellHeight = gameContainer.getMeasuredHeight() / 10;
-
 
         for (int y = 0; y < 10; y++)
             for (int x = 0; x < 10; x++)
@@ -177,10 +203,6 @@ public class MainActivity extends AppCompatActivity implements
                 cellLayoutParams.leftMargin = cellWidth * x;
                 cellLayoutParams.topMargin = cellHeight * y;
             }
-
-        game = HorseGame.getInstance(false);
-        game.setOnStateChange(MainActivity.this);
-        game.setOnGameOverListener(MainActivity.this);
     }
 
     @Override
@@ -218,6 +240,12 @@ public class MainActivity extends AppCompatActivity implements
             }
     }
 
+    @Override
+    public void onConnected()
+    {
+        Toast.makeText(this, R.string.connected, Toast.LENGTH_LONG).show();
+    }
+
     private void resetUI()
     {
         localModeButton.setVisibility(VISIBLE);
@@ -225,6 +253,7 @@ public class MainActivity extends AppCompatActivity implements
         localModeButton.setText(R.string.local_mode);
         networkModeButton.setText(R.string.network_mode);
         hostET.setVisibility(GONE);
+        hostET.setText(null);
         hostET.setInputType(TYPE_CLASS_TEXT);
         gameContainer.removeAllViews();
         findViewById(R.id.game_container).setVisibility(GONE);
@@ -243,5 +272,4 @@ public class MainActivity extends AppCompatActivity implements
         if (gameMode != NONE || networkMode != NONE) resetUI();
         else super.onBackPressed();
     }
-
 }
