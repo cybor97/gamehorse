@@ -1,3 +1,12 @@
 <resources>
-    <string name="app_name">gamehorse</string>
+    <string name="app_name">GameHorse</string>
+    <string name="local_mode">Локальный режим</string>
+    <string name="network_mode">Сетевой режим</string>
+    <string name="connect">Подключиться</string>
+    <string name="host_address">Адрес хоста</string>
+    <string name="create_game">Создать игру</string>
+    <string name="connect_game">Подключиться к игре</string>
+    <string name="you_loose">Извините, но вы проиграли</string>
+    <string name="back">Назад</string>
+    <string name="reset">Сброс</string>
 </resources>

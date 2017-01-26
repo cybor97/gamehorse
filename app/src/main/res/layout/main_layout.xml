@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+             android:id="@+id/main_container"
+             android:layout_width="match_parent"
+             android:layout_height="match_parent"
+             android:background="#FFF">
+
+    <RelativeLayout
+        android:id="@+id/menu_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_margin="30dp"
+        android:background="#EEE"
+        android:orientation="vertical"
+        android:padding="10dp">
+
+        <TextView
+            android:id="@+id/title_tv"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:text="@string/app_name"
+            android:textAlignment="gravity"
+            android:textSize="20pt"/>
+
+        <Button
+            android:id="@+id/local_mode_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/network_mode_button"
+            android:text="@string/local_mode"
+            android:textSize="10pt"/>
+
+        <EditText
+            android:id="@+id/host_et"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/network_mode_button"
+            android:layout_alignParentBottom="true"
+            android:gravity="center_horizontal"
+            android:hint="@string/host_address"
+            android:inputType="textUri"
+            android:textAlignment="gravity"
+            android:visibility="gone"/>
+
+        <Button
+            android:id="@+id/network_mode_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:text="@string/network_mode"
+            android:textSize="12pt"/>
+
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/game_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="invisible">
+
+        <FrameLayout
+            android:id="@+id/game_field_container"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_above="@+id/buttons_container"/>
+
+        <LinearLayout
+            android:id="@+id/buttons_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:weightSum="2">
+
+            <Button
+                android:id="@+id/reset_button"
+                style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/reset"/>
+
+            <Button
+                android:id="@+id/back_button"
+                style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/back"/>
+        </LinearLayout>
+    </RelativeLayout>
+</FrameLayout>
