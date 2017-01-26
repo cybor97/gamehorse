@@ -168,13 +168,55 @@ public class MainActivity extends AppCompatActivity implements
     private void startGameNetwork(String host)
     {
         networkManager = NetworkManager.getInstance();
-        if (host != null)
+        if (host == null)
             networkManager.createGame();
         else
             networkManager.connectGame(host);
-        networkManager.setOnStateChange(this);
-        networkManager.setOnConnectedListener(this);
-        networkManager.setOnGameOverListener(this);
+        networkManager.setOnStateChange(new HorseGame.OnStateChangeListener()
+        {
+            @Override
+            public void onStateChange(final Horse horse)
+            {
+                runOnUiThread(new Runnable()
+                {
+                    @Override
+                    public void run()
+                    {
+                        onStateChange(horse);
+                    }
+                });
+            }
+        });
+        networkManager.setOnConnectedListener(new NetworkManager.OnConnectedListener()
+        {
+            @Override
+            public void onConnected()
+            {
+                runOnUiThread(new Runnable()
+                {
+                    @Override
+                    public void run()
+                    {
+                        onConnected();
+                    }
+                });
+            }
+        });
+        networkManager.setOnGameOverListener(new HorseGame.OnGameOverListener()
+        {
+            @Override
+            public void onGameOver(final Horse looser)
+            {
+                runOnUiThread(new Runnable()
+                {
+                    @Override
+                    public void run()
+                    {
+                        onGameOver(looser);
+                    }
+                });
+            }
+        });
     }
 
     private void generateField()
