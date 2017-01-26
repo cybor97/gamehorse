@@ -60,11 +60,20 @@
         android:layout_height="match_parent"
         android:visibility="invisible">
 
+        <TextView
+            android:id="@+id/dashboard_tv"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:textAlignment="gravity"
+            android:textSize="12pt"/>
+
         <FrameLayout
             android:id="@+id/game_field_container"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_above="@+id/buttons_container"/>
+            android:layout_above="@+id/buttons_container"
+            android:layout_below="@id/dashboard_tv"/>
 
         <LinearLayout
             android:id="@+id/buttons_container"

@@ -47,6 +47,7 @@ public class MainActivity extends AppCompatActivity implements
     private FrameLayout gameContainer;
     private HorseGame game;
     private Map<String, ImageView> viewMap;
+    private TextView dashboardTV;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -65,6 +66,7 @@ public class MainActivity extends AppCompatActivity implements
         networkModeButton.setOnClickListener(this);
 
         hostET = (EditText) findViewById(R.id.host_et);
+        dashboardTV = (TextView) findViewById(R.id.dashboard_tv);
 
         findViewById(R.id.back_button).setOnClickListener(this);
         findViewById(R.id.reset_button).setOnClickListener(this);
@@ -191,6 +193,8 @@ public class MainActivity extends AppCompatActivity implements
     public void onStateChange(Horse horse)
     {
         GameMap map = game.getMap();
+        if (horse != null)
+            dashboardTV.setText(String.format("%s", horse.getScore()));
         for (int x = 0; x < map.getWidth(); x++)
             for (int y = 0; y < map.getHeight(); y++)
             {
