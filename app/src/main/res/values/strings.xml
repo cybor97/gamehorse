@@ -9,4 +9,5 @@
     <string name="you_loose">Извините, но вы проиграли</string>
     <string name="back">Назад</string>
     <string name="reset">Сброс</string>
+    <string name="connected">Успешно подключено!</string>
 </resources>
