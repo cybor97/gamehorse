@@ -27,31 +27,34 @@
             android:id="@+id/local_mode_button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_above="@+id/network_mode_button"
+            android:layout_above="@+id/network_mode_container"
             android:text="@string/local_mode"
             android:textSize="10pt"/>
 
-        <EditText
-            android:id="@+id/host_et"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_above="@+id/network_mode_button"
-            android:layout_alignParentBottom="true"
-            android:gravity="center_horizontal"
-            android:hint="@string/host_address"
-            android:inputType="textUri"
-            android:textAlignment="gravity"
-            android:visibility="gone"/>
-
-        <Button
-            android:id="@+id/network_mode_button"
+        <LinearLayout
+            android:id="@+id/network_mode_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
-            android:text="@string/network_mode"
-            android:textSize="12pt"/>
+            android:orientation="vertical">
 
+            <EditText
+                android:id="@+id/host_et"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:hint="@string/host_address"
+                android:inputType="textUri"
+                android:textAlignment="gravity"
+                android:visibility="gone"/>
 
+            <Button
+                android:id="@+id/network_mode_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/network_mode"
+                android:textSize="12pt"/>
+        </LinearLayout>
     </RelativeLayout>
 
     <RelativeLayout
