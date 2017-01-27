@@ -50,9 +50,9 @@ public class NetworkManager
             {
                 try
                 {
+                    isHost = true;
                     socket = new ServerSocket(PORT_NUMBER).accept();
                     initStreams();
-                    isHost = true;
                     runInteraction();
                 } catch (IOException e)
                 {
@@ -95,32 +95,38 @@ public class NetworkManager
             horseGame = HorseGame.getInstance(true);
             horseGame.setOnStateChange(onStateChangeListener);
 
-            Horse currentPlayer = horseGame.getHorse(CURRENT_PLAYER);
-            Horse enemyPlayer = horseGame.getHorse(ENEMY);
             if (!isHost)
             {
-                sendMessage("15_0");
-                currentPlayer.setX(0);
-                currentPlayer.setY(15);
-                enemyPlayer.setX(15);
-                enemyPlayer.setY(0);
-            }
+                sendMessage("0_15");
+                horseGame.tryStep(CURRENT_PLAYER, 0, 15, true);
+                horseGame.tryStep(ENEMY, 15, 0, true);
+            } else horseGame.tryStep(CURRENT_PLAYER, 15, 0, true);
             while (!Thread.interrupted())
-            {
-                List<Integer> enemyCoords = Utils.parseCoordinates(receiveMessage());
-                if (enemyCoords != null)
-                    horseGame.tryStep(ENEMY, enemyCoords.get(0), enemyCoords.get(1));
-
-                List<Integer> coords = new ArrayList<>();
-                coords.add(currentPlayer.getX());
-                coords.add(currentPlayer.getY());
-                sendMessage(Utils.packCoordinates(coords));
-            }
+                for (Horse current : horseGame.getHistory().get(CURRENT_PLAYER))
+                {
+                    receiveStep();
+                    sendStep(current);
+                }
 
         } catch (IOException e)
         {
             Log.e("runInteraction", e.toString());
         }
+    }
+
+    public void receiveStep() throws IOException
+    {
+        List<Integer> enemyCoords = Utils.parseCoordinates(receiveMessage());
+        if (enemyCoords != null)
+            horseGame.tryStep(ENEMY, enemyCoords.get(0), enemyCoords.get(1));
+    }
+
+    public void sendStep(Horse horse) throws IOException
+    {
+        List<Integer> coords = new ArrayList<>();
+        coords.add(horse.getX());
+        coords.add(horse.getY());
+        sendMessage(Utils.packCoordinates(coords));
     }
 
     public String receiveMessage() throws IOException

@@ -104,10 +104,14 @@ public class HorseGame
 
     public boolean tryStep(int player, int x, int y)
     {
+        return tryStep(player, x, y, false);
+    }
+
+    public boolean tryStep(int player, int x, int y, boolean initStep)
+    {
         Horse horse = getHorse(player);
         if (horse.getState() == PLAYING && (stepAvailable(horse, x, y) || firstMove))
         {
-
             List<Horse> playerHistory = history.get(player);
             if (!playerHistory.isEmpty() && !firstMove)
             {
@@ -118,10 +122,13 @@ public class HorseGame
             map.setCell(x, y, HORSE);
             horse.setX(x);
             horse.setY(y);
-            horse.setScore(horse.getScore() + 1);
-            playerHistory.add(horse.copy());
 
-            firstMove = false;
+            if (!initStep)
+            {
+                horse.setScore(horse.getScore() + 1);
+                playerHistory.add(horse.copy());
+                firstMove = false;
+            }
             return true;
         } else
         {
@@ -174,6 +181,11 @@ public class HorseGame
         init(multiplayer);
         if (onStateChangeListener != null)
             onStateChangeListener.onStateChange(null);
+    }
+
+    public List<List<Horse>> getHistory()
+    {
+        return history;
     }
 
     public void setOnGameOverListener(OnGameOverListener onGameOverListener)
