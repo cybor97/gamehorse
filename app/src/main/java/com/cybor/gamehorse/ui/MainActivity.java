@@ -286,6 +286,15 @@ public class MainActivity extends AppCompatActivity implements
     public void onConnected()
     {
         Toast.makeText(this, R.string.connected, Toast.LENGTH_LONG).show();
+        menuContainer.animate().alpha(0).withEndAction(new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                menuContainer.setVisibility(GONE);
+            }
+        });
+        gameMode = NETWORK_MODE;
     }
 
     private void resetUI()
