@@ -10,6 +10,7 @@ import java.io.OutputStreamWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.ConcurrentModificationException;
 import java.util.List;
 
 public class NetworkManager
@@ -60,7 +61,6 @@ public class NetworkManager
                 }
             }
         })).start();
-
     }
 
     public void connectGame(final String host)
@@ -97,15 +97,28 @@ public class NetworkManager
 
             if (!isHost)
             {
-                sendMessage("0_15");
-                horseGame.tryStep(CURRENT_PLAYER, 0, 15, true);
-                horseGame.tryStep(ENEMY, 15, 0, true);
-            } else horseGame.tryStep(CURRENT_PLAYER, 15, 0, true);
+                sendMessage("0_9");
+                horseGame.tryStep(CURRENT_PLAYER, 0, 9, true);
+                horseGame.tryStep(ENEMY, 9, 0, true);
+            } else horseGame.tryStep(CURRENT_PLAYER, 9, 0, true);
             while (!Thread.interrupted())
-                for (Horse current : horseGame.getHistory().get(CURRENT_PLAYER))
+                try
                 {
-                    receiveStep();
-                    sendStep(current);
+                    for (Horse current : horseGame.getHistory().get(CURRENT_PLAYER))
+                    {
+                        receiveStep();
+                        sendStep(current);
+                    }
+                    try
+                    {
+                        Thread.sleep(100);
+                    } catch (InterruptedException e)
+                    {
+                        Log.e("runInteraction", e.toString());
+                    }
+                } catch (ConcurrentModificationException e)
+                {
+
                 }
 
         } catch (IOException e)

@@ -98,9 +98,8 @@ public class MainActivity extends AppCompatActivity implements
                             (ipAddress >> 8 & 0xff),
                             (ipAddress >> 16 & 0xff),
                             (ipAddress >> 24 & 0xff)));
-                } else if (networkMode == HOST)
                     startGameNetwork(null);
-                else
+                } else
                 {
                     networkMode = NONE;
                     menuContainer.animate().alpha(0).withEndAction(new Runnable()
@@ -182,7 +181,7 @@ public class MainActivity extends AppCompatActivity implements
                     @Override
                     public void run()
                     {
-                        onStateChange(horse);
+                        MainActivity.this.onStateChange(horse);
                     }
                 });
             }
@@ -197,7 +196,7 @@ public class MainActivity extends AppCompatActivity implements
                     @Override
                     public void run()
                     {
-                        onConnected();
+                        MainActivity.this.onConnected();
                     }
                 });
             }
@@ -212,7 +211,7 @@ public class MainActivity extends AppCompatActivity implements
                     @Override
                     public void run()
                     {
-                        onGameOver(looser);
+                        MainActivity.this.onGameOver(looser);
                     }
                 });
             }
@@ -256,6 +255,8 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void onStateChange(Horse horse)
     {
+        if (game == null)
+            game = HorseGame.getInstance(true);
         GameMap map = game.getMap();
         if (horse != null)
             dashboardTV.setText(String.format("%s", horse.getScore()));
@@ -294,6 +295,7 @@ public class MainActivity extends AppCompatActivity implements
                 menuContainer.setVisibility(GONE);
             }
         });
+        generateField();
         gameMode = NETWORK_MODE;
     }
 
