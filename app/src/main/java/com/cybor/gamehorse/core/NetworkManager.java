@@ -22,7 +22,6 @@ public class NetworkManager
     private BufferedReader reader;
     private Thread remotePlayer;
     private int PORT_NUMBER = 12014;
-    private List<Integer> coords;
     private boolean isHost;
     private OnConnectedListener onConnectedListener;
     private HorseGame.OnGameOverListener onGameOverListener;
@@ -86,7 +85,6 @@ public class NetworkManager
         })).start();
     }
 
-
     public void runInteraction()
     {
         try
@@ -95,18 +93,7 @@ public class NetworkManager
                 onConnectedListener.onConnected();
 
             horseGame = HorseGame.getInstance(true);
-            horseGame.setOnStateChange(new HorseGame.OnStateChangeListener()
-            {   //Ваня, в твоем случае... Глянь в createGame.
-                @Override
-                public void onStateChange(Horse horse)
-                {
-                    coords = new ArrayList<>();
-                    coords.add(horse.getX());
-                    coords.add(horse.getY());
-                    if (onStateChangeListener != null)
-                        onStateChangeListener.onStateChange(horse);
-                }
-            });
+            horseGame.setOnStateChange(onStateChangeListener);
 
             Horse currentPlayer = horseGame.getHorse(CURRENT_PLAYER);
             Horse enemyPlayer = horseGame.getHorse(ENEMY);
@@ -115,22 +102,19 @@ public class NetworkManager
                 sendMessage("15_0");
                 currentPlayer.setX(0);
                 currentPlayer.setY(15);
+                enemyPlayer.setX(15);
+                enemyPlayer.setY(0);
             }
             while (!Thread.interrupted())
             {
                 List<Integer> enemyCoords = Utils.parseCoordinates(receiveMessage());
                 if (enemyCoords != null)
-                {
-                    enemyPlayer.setX(enemyCoords.get(0));
-                    enemyPlayer.setY(enemyCoords.get(1));
-                }
+                    horseGame.tryStep(ENEMY, enemyCoords.get(0), enemyCoords.get(1));
 
-                if (coords != null)
-                {
-                    sendMessage(Utils.packCoordinates(coords));
-                    coords = null;
-                }
-
+                List<Integer> coords = new ArrayList<>();
+                coords.add(currentPlayer.getX());
+                coords.add(currentPlayer.getY());
+                sendMessage(Utils.packCoordinates(coords));
             }
 
         } catch (IOException e)
